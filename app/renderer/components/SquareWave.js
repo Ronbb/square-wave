@@ -1,20 +1,17 @@
 import React, { Component } from 'react'
-import { fft, ifft } from 'fft-js'
+import { fft, ifft, util } from 'fft-js'
+import ResultChart from './ResultChart'
 
 class SquareWave extends Component {
   constructor(props) {
     super(props)
     this.state = {
       reference: 1, // 参考频率
-      sample: 64, // 采样频率
-      filter: 8, // 低通滤波截止频率
+      sample: 2, // 采样频率
+      filter: 100, // 低通滤波截止频率
       cycle: 3, // 最小周期
       phase: 0, // 相位
     }
-  }
-
-  componentDidMount() {
-    console.log('result', this.jump(this.filt(), 100))
   }
 
   getStepTime = () => this.state.reference / this.state.sample
@@ -122,7 +119,7 @@ class SquareWave extends Component {
   }
 
   render() {
-    return <div>2333</div>
+    return <ResultChart result={this.jump(this.filt(), 100)} />
   }
 }
 
