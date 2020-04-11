@@ -21,6 +21,7 @@
     "no-param-reassign": "warn",
     "func-names": "off",
     "no-unused-expressions" : "error",
+    "no-unused-vars": "warn",
     "no-extra-semi": "warn",
     "semi": ["warn", "never"],
     "block-scoped-var": "error",
