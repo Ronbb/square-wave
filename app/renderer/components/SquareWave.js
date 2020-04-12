@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { fft, ifft, util } from 'fft-js'
+import { fft, ifft } from 'fft-js'
 import ResultChart from './ResultChart'
 
 class SquareWave extends Component {
@@ -7,10 +7,11 @@ class SquareWave extends Component {
     super(props)
     this.state = {
       reference: 1, // 参考频率
-      sample: 2, // 采样频率
-      filter: 100, // 低通滤波截止频率
+      sample: 16, // 采样频率
+      filter: 16, // 低通滤波截止频率
       cycle: 3, // 最小周期
-      phase: 0, // 相位
+      phase: -0.4, // 相位
+      redundant: 64,
     }
   }
 
@@ -20,8 +21,8 @@ class SquareWave extends Component {
     return this.getFilledNumber(ordinaryStepNumber)
   }
   getResampleFreq = () => {
-    const { filter } = this.state
-    return this.getFilledNumber(filter * 10) // 10倍冗余
+    const { filter, redundant } = this.state
+    return this.getFilledNumber(filter * redundant) // 32倍冗余
   }
   getFilledNumber = (number) => {
     let tmp = number
@@ -90,11 +91,21 @@ class SquareWave extends Component {
       }
     })
     console.info('resampleResult', resampleResult)
+    // 二次采样总点数
+    const resampleNumber = resampleResult.length
+    // average
+    // const average = resampleResult.reduce((pre, cur) => pre + cur.value, 0) / resampleNumber
+    // offset 
+    // resampleResult = resampleResult.map(point => {
+    //   return {
+    //     timePoint: point.timePoint,
+    //     value: point.timePoint - 0.5
+    //   }
+    // })
+    // console.info('average', average)
     // 二次实际采样频率
     const realSampleFreq = 1 / stepTime
     console.info('realSampleFreq', realSampleFreq)
-    // 二次采样总点数
-    const resampleNumber = resampleResult.length
     // fft
     let phasors = fft(resampleResult.map((point) => point.value))
     console.info('phasors', phasors)
@@ -102,18 +113,18 @@ class SquareWave extends Component {
     const cutOffIndex = (this.state.filter * resampleResult.length) / realSampleFreq
     console.info('cutOffIndex', cutOffIndex)
     phasors = phasors.slice(0, cutOffIndex)
-    phasors = phasors.concat(Array(resampleNumber-cutOffIndex).fill([0,0]))
+    phasors = phasors.concat(Array(resampleNumber - cutOffIndex).fill([0, 0]))
     console.info('filter-phasors', phasors)
     // ifft
     const signal = ifft(phasors)
     console.info('signal', signal)
-    const magnitudes = signal.map(c =>Math.sqrt(c[0]*c[0] + c[1]*c[1]))
+    const magnitudes = signal.map(c => c[0])
     console.info('magnitudes', magnitudes)
 
     return resampleResult.map((point, index) => {
       return {
         timePoint: point.timePoint,
-        value: magnitudes[index]
+        value: magnitudes[index],
       }
     })
   }
