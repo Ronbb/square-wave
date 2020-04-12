@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { G2, Chart, Geom, Axis, Tooltip, Coord, Label, Legend, View, Guide, Shape, Facet, Util, } from 'bizcharts'
+import { Chart, Geom, Axis, Tooltip } from 'bizcharts'
 
 export class ResultChart extends Component {
   static propTypes = {
@@ -18,16 +18,6 @@ export class ResultChart extends Component {
         }}
       />
       <Geom type="line" position="timePoint*value" size={2} />
-      <Geom
-        type="point"
-        position="timePoint*value"
-        size={4}
-        shape={"circle"}
-        style={{
-          stroke: "#fff",
-          lineWidth: 1
-        }}
-      />
     </Chart>
   </div>
   }
