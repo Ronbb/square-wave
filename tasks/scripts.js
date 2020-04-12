@@ -1,13 +1,14 @@
-const { src, dest } = require('gulp');
-const babel = require('gulp-babel');
-const sourcemaps = require('gulp-sourcemaps');
-const inject = require('gulp-inject-string');
+const { src, dest } = require('gulp')
+const babel = require('gulp-babel')
+const sourcemaps = require('gulp-sourcemaps')
+const inject = require('gulp-inject-string')
+const less = require('gulp-less')
 
 function build() {
   return src('app/**/*.js')
     .pipe(babel())
     .pipe(inject.replace('process.env.NODE_ENV', '"production"'))
-    .pipe(dest('build'));
+    .pipe(dest('build'))
 }
 
 function developBuild() {
@@ -15,11 +16,18 @@ function developBuild() {
     .pipe(sourcemaps.init())
     .pipe(babel())
     .pipe(sourcemaps.write())
-    .pipe(dest('build'));
+    .pipe(dest('build'))
 }
 
-build.displayName = 'build-scripts';
-developBuild.displayName = 'dev-build-scripts';
+function style() {
+  return src('app/**/*.less')
+    .pipe(less({javascriptEnabled: true}))
+    .pipe(dest('build'))
+}
 
-exports.build = build;
-exports.developBuild = developBuild;
+build.displayName = 'build-scripts'
+developBuild.displayName = 'dev-build-scripts'
+
+exports.style = style
+exports.build = build
+exports.developBuild = developBuild
