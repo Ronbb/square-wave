@@ -4,7 +4,7 @@ module.exports = {
       '@babel/preset-env',
       {
         targets: {
-          electron: '6.0',
+          electron: '8.0',
         },
       },
     ],
@@ -13,5 +13,9 @@ module.exports = {
   plugins: [
     ['@babel/plugin-proposal-decorators', { legacy: true }],
     ['@babel/plugin-proposal-class-properties', { loose: true }],
+    ['babel-plugin-import', {
+      libraryName: 'antd',
+      libraryDirectory: 'lib'
+    }]
   ],
 }
