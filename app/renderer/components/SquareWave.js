@@ -1,18 +1,26 @@
 import React, { Component } from 'react'
 import { fft, ifft } from 'fft-js'
 import ResultChart from './ResultChart'
+import { Button, Form, Slider, Layout, Row, Col } from 'antd'
 
 class SquareWave extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      reference: 1, // 参考频率
-      sample: 16, // 采样频率
-      filter: 16, // 低通滤波截止频率
+      reference: 60, // 参考频率
+      sample: 100, // 采样频率
+      filter: 150, // 低通滤波截止频率
       cycle: 3, // 最小周期
-      phase: -0.4, // 相位
+      phase: 0, // 相位
       redundant: 64,
+      jump: 100,
+      loading: false,
+      result: []
     }
+  }
+
+  componentDidMount() {
+    this.gen(this.state)
   }
 
   getStepTime = () => this.state.reference / this.state.sample
@@ -95,7 +103,7 @@ class SquareWave extends Component {
     const resampleNumber = resampleResult.length
     // average
     // const average = resampleResult.reduce((pre, cur) => pre + cur.value, 0) / resampleNumber
-    // offset 
+    // offset
     // resampleResult = resampleResult.map(point => {
     //   return {
     //     timePoint: point.timePoint,
@@ -110,15 +118,16 @@ class SquareWave extends Component {
     let phasors = fft(resampleResult.map((point) => point.value))
     console.info('phasors', phasors)
     // 低通
-    const cutOffIndex = (this.state.filter * resampleResult.length) / realSampleFreq
+    const cutOffIndex = Math.floor((this.state.filter * resampleResult.length) / realSampleFreq)
     console.info('cutOffIndex', cutOffIndex)
     phasors = phasors.slice(0, cutOffIndex)
-    phasors = phasors.concat(Array(resampleNumber - cutOffIndex).fill([0, 0]))
+    if (resampleNumber - cutOffIndex > 0)
+      phasors = phasors.concat(Array(resampleNumber - cutOffIndex).fill([0, 0]))
     console.info('filter-phasors', phasors)
     // ifft
     const signal = ifft(phasors)
     console.info('signal', signal)
-    const magnitudes = signal.map(c => c[0])
+    const magnitudes = signal.map((c) => c[0])
     console.info('magnitudes', magnitudes)
 
     return resampleResult.map((point, index) => {
@@ -129,8 +138,57 @@ class SquareWave extends Component {
     })
   }
 
+  gen = (values) => {
+    this.setState(values, ()  => {
+      this.setState({
+        result: this.jump(this.filt(), this.state.jump)
+      })
+    })
+  }
+
   render() {
-    return <ResultChart result={this.jump(this.filt(), 100)} />
+    const { loading, result } = this.state
+    return (
+      <div style={{ height: '100vh' }}>
+        <Layout.Content style={{ padding: '3%' }}>
+          <ResultChart result={result} />
+          <Form initialValues={this.state} onFinish={this.gen}>
+            <Row gutter={16} justify="space-around">
+              <Col span={10}>
+                <Form.Item>
+                  <Button type="primary" loading={loading} htmlType="submit">
+                    Generate
+                  </Button>
+                </Form.Item>
+                <Form.Item label="reference" name="reference">
+                  <Slider min={50} max={100} step={1} />
+                </Form.Item>
+                <Form.Item label="sample" name="sample">
+                  <Slider min={100} max={1000} step={10} />
+                </Form.Item>
+                <Form.Item label="filter" name="filter">
+                  <Slider min={100} max={1000} step={10} />
+                </Form.Item>
+              </Col>
+              <Col span={10}>
+                <Form.Item label="cycle" name="cycle">
+                  <Slider min={1} max={10} step={0.1} />
+                </Form.Item>
+                <Form.Item label="phase" name="phase">
+                  <Slider min={-1} max={1} step={0.1} />
+                </Form.Item>
+                <Form.Item label="redundant" name="redundant">
+                  <Slider min={1} max={1000} step={1} />
+                </Form.Item>
+                <Form.Item label="jump" name="jump">
+                  <Slider min={1} max={1000} step={1} />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form>
+        </Layout.Content>
+      </div>
+    )
   }
 }
 
