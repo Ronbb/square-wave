@@ -8,18 +8,20 @@ export class ResultChart extends Component {
   }
 
   render() {
-    return       <div>
-    <Chart height={400} data={this.props.result} forceFit>
-      <Axis name="timePoint" />
-      <Axis name="value" />
-      <Tooltip
-        crosshairs={{
-          type: "y"
-        }}
-      />
-      <Geom type="line" position="timePoint*value" size={2} />
-    </Chart>
-  </div>
+    return (
+      <div>
+        <Chart height={400} data={this.props.result} forceFit style={{marginBottom: '-50px'}}>
+          <Axis name="timePoint" />
+          <Axis name="value" />
+          <Tooltip
+            crosshairs={{
+              type: 'y',
+            }}
+          />
+          <Geom type="line" position="timePoint*value" size={2} />
+        </Chart>
+      </div>
+    )
   }
 }
 
